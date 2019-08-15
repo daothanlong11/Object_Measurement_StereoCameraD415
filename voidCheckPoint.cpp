@@ -8,7 +8,6 @@ vector<Point2f> checkPoint(vector<Point2f> PointCheck, Mat frameDis)
     const uint16_t width = frameDis.cols;
     const uint16_t height = frameDis.rows;
     float fourPoint[4][2];
-    vector<Point2f> PointCorner;
 
     Mat frameGray = Mat::zeros(Size(width, height), CV_8U);
     const Point2f pts = (const cv::Point2f*) Mat(PointCheck).data;
@@ -66,7 +65,7 @@ vector<Point2f> checkPoint(vector<Point2f> PointCheck, Mat frameDis)
     PointCheck.clear();
     for (uint8_t i=0; i<4; i++)
     {
-        PointCorner.push_back(Point2i(fourPoint[i][0],fourPoint[i][1]));
+        PointCheck.push_back(Point2i(fourPoint[i][0],fourPoint[i][1]));
     }
-    return PointCorner;
+    return PointCheck;
 }
