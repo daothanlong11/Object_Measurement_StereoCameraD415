@@ -1,5 +1,9 @@
 #include "opencv2/opencv.hpp"
 
+vector<Point2f> checkPoint(vector<Point2f> fourPoint);
+
+
+
 ////////////////////////////////////////////////////////////
 vector<Point2f> checkPoint(vector<Point2f> PointCheck, Mat frameDis)
 {
@@ -10,18 +14,19 @@ vector<Point2f> checkPoint(vector<Point2f> PointCheck, Mat frameDis)
     float fourPoint[4][2];
 
     Mat frameGray = Mat::zeros(Size(width, height), CV_8U);
-    const Point2f pts = (const cv::Point2f*) Mat(PointCheck).data;
-    polylines(frameGray, &pts, 4, 1, true, 255);
+    Point pt[4];
 
     for(uint8_t i=0; i<4; i++)
     {
         fourPoint[i][0] = PointCheck[i].x;
         fourPoint[i][1] = PointCheck[i].y;
+        pt[i] = Point(PointCheck[i]);
     }
+    fillConvexPoly(frameGray, pt, 4, 255);
 
     for (uint8_t index=0; index<4; index++)
     {
-        if (frameDis.get_distance(fourPoint[i][0], fourPoint[i][1]) == 0)
+        if (frameDis.get_distance(fourPoint[index][0], fourPoint[index][1]) == 0)
         {
             uint8_t r = 1;
             int16_t pre_x = fourPoint[index][0];
@@ -49,7 +54,7 @@ vector<Point2f> checkPoint(vector<Point2f> PointCheck, Mat frameDis)
                     {
                         b = 8*r-i;
                     }
-                    if((frameDis.get_distance(fourPoint[i][0], fourPoint[i][1]) > 0.5f) 
+                    if((frameDis.get_distance(x+a, y+b) > 0.5f) 
                                     && (frameGray.at<uchar>(y+b,x+a) == 255))
                     {
                         fourPoint[index][0] = x+a;
