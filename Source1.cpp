@@ -1,5 +1,5 @@
 
-//#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
+ //#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 #include <sys/stat.h>
 #include <librealsense2/rs.hpp>
 #include <librealsense2/rsutil.h>
