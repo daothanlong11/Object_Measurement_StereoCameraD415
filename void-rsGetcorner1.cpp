@@ -7,8 +7,6 @@
 using namespace cv;
 using namespace std;
 
-Mat mau;
-
 vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height);
 ////////////////////////////////////////////////////////////////////
 
@@ -33,45 +31,33 @@ int main(int argc, char * argv[]) try
     const auto window_name = "Display Image";
     namedWindow(window_name, WINDOW_AUTOSIZE);
     
-    //VideoWriter video("rs-depVideo2.avi",CV_FOURCC('M','J','P','G'),10, Size(640,480)); 
-
     while (waitKey(1) < 0 && getWindowProperty(window_name, WND_PROP_AUTOSIZE) >= 0)
     {
         rs2::frameset data = pipe.wait_for_frames(); // Wait for next set of frames from the camera
-        rs2::frameset data1 = data;
-        data1 = data1.apply_filter(hole);
-        data1 = data1.apply_filter(align_to);
+        data = data.apply_filter(hole);
+        data = data.apply_filter(align_to);
 
         //rs2::frame imageColor = data.get_color_frame();
         //rs2::frame ir_frame = data.first(RS2_STREAM_INFRARED);
         
-        rs2::frame dep_frame = data1.get_color_frame();
-        rs2::depth_frame depth = data1.get_depth_frame();
+        rs2::frame dep_frame = data.get_color_frame();
+        rs2::depth_frame depth = data.get_depth_frame();
         
 
         
         // Create OpenCV matrix of size (w,h) from the colorized depth data
-        Mat image1(Size(w, h), CV_8UC3, (void*)dep_frame.get_data(), Mat::AUTO_STEP);
-        mau = image1.clone();
-
+        Mat image(Size(w, h), CV_8UC3, (void*)dep_frame.get_data(), Mat::AUTO_STEP);
         
         vector<Point2f> hai = getCorner(depth, w, h);
-        if(hai.size() > 1)
+        cout<<"size corner: "<<hai.size()<<endl;
+        if( hai.size() > 1)
         {
             for(int i = 0; i < hai.size()-1; i++ )
-            line(mau, hai[i], hai[(i+1)%4], Scalar(0, 255, 0), 1, LINE_AA);
+            line(image, hai[i], hai[(i+1)%4], Scalar(0, 255, 0), 1, LINE_AA);
         }
         
-        //Mat colorhai;
-        //cvtColor(hai, colorhai, CV_GRAY2BGR);
-        //video.write(colorhai);
-
-        //mau.create(image3.size(), image3.type());
-        //mau = Scalar::all(0);
-        //image3.copyTo(mau, hai);
-        
         // Update the window with new data
-        imshow(window_name, mau);
+        imshow(window_name, image);
     }
 
     return EXIT_SUCCESS;
@@ -89,8 +75,6 @@ catch (const std::exception& e)
 
 vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
 {
-    int64 t0 = cv::getTickCount();
-
     #define radius 6
     float vicinityDistance = 0.001f;
     
@@ -141,12 +125,12 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
             }
         }
         vicinityDistance += 0.001f + (0.2f*(float)(numberNext*numberNext*numberNext)+6.0f*(float)numberNext+3.0f)*0.00005f;
-        if (vicinityDistance > 0.03f)
+        if (vicinityDistance > 0.04f)
         {
             fourCorner.push_back(Point2f(0.0f,0.0f));
             return fourCorner;
         }
-    } while (numberNext >= 3);
+    } while (numberNext > 3);
     
     
     for (uint16_t i = 0; i < numberNext; i++)
@@ -218,9 +202,6 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     Point2f fourPoint[4];
     RotatedRect box = minAreaRect(contours[indexmaxContours[0]]);
     box.points(fourPoint);
-    for(int i = 0; i < 4; i++ )
-    line(mau, fourPoint[i], fourPoint[(i+1)%4], Scalar(0, 255, 0), 1, LINE_AA);
-    
     
     for (uint8_t indexPoint=0; indexPoint<4; indexPoint++)
     {
@@ -272,7 +253,5 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     }
     fourCorner.push_back(Point2f(objectHeight, 0.0f));
     //////////////////////////////////////////////////////////////////
-    int64 t1 = cv::getTickCount();
-    double secs = (t1-t0)/cv::getTickFrequency();
     return fourCorner;
 }
