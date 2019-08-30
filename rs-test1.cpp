@@ -8,7 +8,7 @@ using namespace cv;
 using namespace std;
 
 
-vector<Point2f> distanceframe(rs2::depth_frame depth, int width, int height);
+vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height);
 ////////////////////////////////////////////////////////////////////
 
 int main(int argc, char * argv[]) try
@@ -73,7 +73,7 @@ catch (const std::exception& e)
     return EXIT_FAILURE;
 }
 
-vector<Point2f> distanceframe(rs2::depth_frame depth, int width, int height)
+vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
 {
     int64 t0 = cv::getTickCount();
 
