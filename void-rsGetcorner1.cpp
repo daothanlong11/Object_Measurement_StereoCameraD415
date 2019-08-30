@@ -76,7 +76,7 @@ catch (const std::exception& e)
 vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
 {
     #define radius 6
-    float vicinityDistance = 0.001f;
+    float vicinityDistance = 0.025f;
     
     Mat frameDepth = Mat::zeros(Size(width, height), CV_8U);
     vector<Point2f> fourCorner;
@@ -95,43 +95,33 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     uint sumMaxPoint = 0;
     uint numberNext;
     
-    do
+    numberNext = 0;
+    for (uint16_t x = 70; x < width; x+=50)
     {
-        numberNext = 0;
-        for (uint16_t x = 70; x < width; x+=50)
+        for (uint16_t y = 60; y < height; y+=50)
         {
-            for (uint16_t y = 60; y < height; y+=50)
+            float distance = depth.get_distance(x,y);
+            if ((distance > vicinityDistance)&&(distance < 2.0f))
             {
-                float distance = depth.get_distance(x,y);
-                if ((distance > vicinityDistance)&&(distance < 2.0f))
+                bool flagNext = true;
+                for (uint8_t i = 0; i < numberNext; i++)
                 {
-                    bool flagNext = true;
-                    for (uint8_t i = 0; i < numberNext; i++)
+                    float subDistance = abs(setDistance[i][0] - distance);
+                    if (subDistance <= vicinityDistance)
                     {
-                        float subDistance = abs(setDistance[i][0] - distance);
-                        if (subDistance <= vicinityDistance)
-                        {
-                            setDistance[i][1]++;
-                            flagNext = false;
-                            break;
-                        }
+                        setDistance[i][1]++;
+                        flagNext = false;
+                        break;
                     }
-                    if (flagNext && (numberNext < 10))
-                    {
-                        setDistance[numberNext][0] = distance;
-                        numberNext++;
-                    }
+                }
+                if (flagNext && (numberNext < 10))
+                {
+                    setDistance[numberNext][0] = distance;
+                    numberNext++;
                 }
             }
         }
-        vicinityDistance += 0.001f + (0.2f*(float)(numberNext*numberNext*numberNext)+6.0f*(float)numberNext+3.0f)*0.00005f;
-        if (vicinityDistance > 0.04f)
-        {
-            fourCorner.push_back(Point2f(0.0f,0.0f));
-            return fourCorner;
-        }
-    } while (numberNext > 3);
-    
+    }   
     
     for (uint16_t i = 0; i < numberNext; i++)
     {
