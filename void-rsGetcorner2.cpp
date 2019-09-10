@@ -75,106 +75,40 @@ catch (const std::exception& e)
 vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
 {
     int64 t0 = cv::getTickCount();
-    #define radius 6
+    //#define radius 6
     //float vicinityDistance = 0.025f;
-    float vicinityDistance = 0.012f;
-    float setVicinityDistance[4] = {0.003f, 0.0275f, 0.011f, 0.018f, };
+    //float vicinityDistance = 0.012f;
+    //float setVicinityDistance[4] = {0.003f, 0.0275f, 0.011f, 0.018f};
+    
+    #define radius 6
+    float vicinityDistance;
+    float setVicinityDistance[4] = {0.003f, 0.0275f, 0.011f, 0.021f};
     
     Mat frameDepth = Mat::zeros(Size(width, height), CV_8U);
     vector<Point2f> fourCorner;
     float objectHeight;
     
     float distanceCenter = depth.get_distance(width/2, height/2);
-    float setDistance[4][10] = {0.0f};
+    float setDistance[10][2] = {0.0f};
     float maxDistance = 0.0f;
     float objectDistance = 0.0f;
-    uint8_t indexSetDistance = 4;
+    float frequencyMaxDistancePoint = 0.0f;
+    float frequencyDistancePoint = 0.0f;
+    float frequencyDistancePointSecondary = 0.0f;
     float sumMaxDistance = 0.0f;
     float sumObjectDistance = 0.0f;
     uint sumObjectPoint = 0;
     uint sumMaxPoint = 0;
-    uint numberNext[4] = {0};
+    uint numberNext;
+    uint8_t numberloop = 0;
     
-    for (uint16_t x = 5; x < width-10; x+=25)
-    {
-        for (uint16_t y = 5; y < height-5; y+=5)
-        {
-            float distance = depth.get_distance(x,y);
-            if ((distance > vicinityDistance)&&(distance < 2.0f))
-            {
-                for (uint8_t indexSetVicinityDistance = 0; indexSetVicinityDistance < 4; indexSetVicinityDistance++)
-                {
-                    bool flagNext = true;
-                    for (uint8_t i = 0; i < numberNext[indexSetVicinityDistance]; i++)
-                    {
-                        float subDistance = abs(setDistance[indexSetVicinityDistance][i] - distance);
-                        if (subDistance <= setVicinityDistance[indexSetVicinityDistance])
-                        {
-                            flagNext = false;
-                            break;
-                        }
-                    }
-                    if (flagNext && (numberNext[indexSetVicinityDistance] < 10))
-                    {
-                        setDistance[indexSetVicinityDistance][numberNext[indexSetVicinityDistance]] = distance;
-                        numberNext[indexSetVicinityDistance]++;
-                    }
-                }
-            }
-        }
-    }
-
-    bool flagtwodistance = true;
-    for (uint8_t i = 0; i < 4; i++)
-    {
-        if (numberNext[i] == 2) 
-        {
-            indexSetDistance = i;
-            flagtwodistance = false;
-            break;
-        }
-    }
-    if (flagtwodistance)
-    {
-        for (uint8_t i = 0; i < 4; i++)
-        {
-            if (numberNext[i] == 3) 
-            {
-                indexSetDistance = i;
-                break;
-            }
-        }
-    }
-    if (indexSetDistance == 4)
-    {
-        fourCorner.push_back(Point2f(0.0f,0.0f));
-        return fourCorner;
-    }
-    uint8_t temp1 = 0;
-    for (uint8_t i = 0; i < numberNext[indexSetDistance]; i++)
-    {
-        if (maxDistance < setDistance[indexSetDistance][i])
-        {
-            maxDistance = setDistance[indexSetDistance][i];
-            temp1 = i;
-        }
-    }
-    setDistance[indexSetDistance][temp1] = 0.0f;
-    for (uint8_t i = 0; i < numberNext[indexSetDistance]; i++)
-    {
-        if (objectDistance < setDistance[indexSetDistance][i]) objectDistance = setDistance[indexSetDistance][i];
-    }
-    vicinityDistance = setVicinityDistance[indexSetDistance];
-    if (vicinityDistance > 0.025f) vicinityDistance = 0.025f;
-    
-    /*
-    ////////////////////////////////////////////////////////////
     do
     {
         numberNext = 0;
-        for (uint16_t x = 5; x < width-10; x+=25)
+        vicinityDistance = setVicinityDistance[numberloop];
+        for (uint16_t x = 10; x < width-5; x+=25)
         {
-            for (uint16_t y = 5; y < height-5; y+=5)
+            for (uint16_t y = 3; y < height-3; y+=5)
             {
                 float distance = depth.get_distance(x,y);
                 if ((distance > vicinityDistance)&&(distance < 2.0f))
@@ -198,15 +132,16 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
                 }
             }
         }
-        vicinityDistance += 0.006f;
-        if (vicinityDistance > 0.04f)
+        numberloop++;
+        cout<<"so luong: "<<numberNext<<endl;
+        if (numberloop == 4)
         {
             fourCorner.push_back(Point2f(0.0f,0.0f));
             return fourCorner;
         }
     } while (numberNext > 3);
-    */
-    /*
+    
+    
     for (uint16_t i = 0; i < numberNext; i++)
     {
         if (setDistance[i][0] > maxDistance)
@@ -232,7 +167,6 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
             }
         }
     }
-    */
 
     for (uint16_t x = 5; x < width-5; x++)
     {
@@ -279,50 +213,6 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     RotatedRect box = minAreaRect(contours[indexmaxContours[0]]);
     box.points(fourPoint);
     
-    /*
-    for (uint8_t indexPoint=0; indexPoint<4; indexPoint++)
-    {
-        if (frameDepth.at<uchar>(fourPoint[indexPoint].y,fourPoint[indexPoint].x)==0)
-        {
-            uint8_t r = 1;
-            int16_t pre_x = fourPoint[indexPoint].x;
-            int16_t pre_y = fourPoint[indexPoint].y;
-            do
-            {
-                int8_t a = 0,b = 0;
-                int16_t x = pre_x-r;
-                int16_t y = pre_y-r;
-                for (uint8_t i = 0; i < 8*r; i++)
-                {
-                    if (i<=2*r)
-                    {
-                        a = i;
-                    }
-                    else if (i<=4*r)
-                    {
-                        b = i-2*r;
-                    }
-                    else if (i<=6*r)
-                    {
-                        a = 6*r-i;
-                    }
-                    else
-                    {
-                        b = 8*r-i;
-                    }
-                    if(frameDepth.at<uchar>(y+b,x+a) == 255)
-                    {
-                        fourPoint[indexPoint].x = x+a;
-                        fourPoint[indexPoint].y = y+b;
-                        r = radius-1;
-                        break;
-                    }
-                }
-                r++; 
-            } while (r < radius);
-        }   
-    }
-    */
     imshow("frameDepth", frameDepth);
     for (uint8_t i = 0; i < 4; i++)
     {
@@ -333,6 +223,5 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     int64 t1 = cv::getTickCount();
     double secs = (t1-t0)/cv::getTickFrequency();
     cout<<"thoi gian: "<<secs<<endl;
-    //cout<<"khoang cach: "<<sumDistan<<endl;
     return fourCorner;
 }
