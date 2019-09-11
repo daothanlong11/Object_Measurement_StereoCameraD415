@@ -13,7 +13,7 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height);
 int main(int argc, char * argv[]) try
 {
     int w = 640;
-    int h = 360;
+    int h = 480;
     rs2::align align_to(RS2_STREAM_DEPTH);
     // Declare depth colorizer for pretty visualization of depth data
     rs2::colorizer color_map;
@@ -80,11 +80,12 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     //float vicinityDistance = 0.012f;
     //float setVicinityDistance[4] = {0.003f, 0.0275f, 0.011f, 0.018f};
     
-    #define radius 6
+    #define radius 12
     float vicinityDistance;
-    float setVicinityDistance[4] = {0.003f, 0.0275f, 0.011f, 0.021f};
+    float setVicinityDistance[4] = {0.003f, 0.0275f, 0.011f, 0.022f};
     
     Mat frameDepth = Mat::zeros(Size(width, height), CV_8U);
+    Mat frametemp = frameDepth.clone();
     vector<Point2f> fourCorner;
     float objectHeight;
     
@@ -101,15 +102,43 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     uint sumMaxPoint = 0;
     uint numberNext;
     uint8_t numberloop = 0;
+
     
+    Point2i pointCentral;
+    pointCentral.x = width/2+1;
+    pointCentral.y = height/2+1;
+    uint8_t lengthWidth = 25;
+    uint8_t lengthHeight = 20;
+    
+
+
     do
     {
         numberNext = 0;
         vicinityDistance = setVicinityDistance[numberloop];
-        for (uint16_t x = 10; x < width-5; x+=25)
+        for (uint r=1; r < radius; r++)
         {
-            for (uint16_t y = 3; y < height-3; y+=5)
+            int16_t x = pointCentral.x - (r+1)*lengthWidth;
+            int16_t y = pointCentral.y - r*lengthHeight;
+            for (uint numberPointloop = 0; numberPointloop < 8*r; numberPointloop++)
             {
+                if (numberPointloop <= 2*r)
+                {
+                    x += lengthWidth;
+                }
+                else if (numberPointloop <= 4*r)
+                {
+                    y += lengthHeight;
+                }
+                else if (numberPointloop <= 6*r)
+                {
+                    x -= lengthWidth;
+                }
+                else
+                {
+                    y -= lengthHeight;
+                }
+                frametemp.at<uchar>(y,x) = 255;
                 float distance = depth.get_distance(x,y);
                 if ((distance > vicinityDistance)&&(distance < 2.0f))
                 {
@@ -136,11 +165,12 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
         cout<<"so luong: "<<numberNext<<endl;
         if (numberloop == 4)
         {
-            fourCorner.push_back(Point2f(0.0f,0.0f));
-            return fourCorner;
+            //fourCorner.push_back(Point2f(0.0f,0.0f));
+            //return fourCorner;
+            break;
         }
     } while (numberNext > 3);
-    
+    imshow("frametemp", frametemp);
     
     for (uint16_t i = 0; i < numberNext; i++)
     {
@@ -168,9 +198,9 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
         }
     }
 
-    for (uint16_t x = 5; x < width-5; x++)
+    for (uint16_t x = 0; x < width; x++)
     {
-        for (uint16_t y = 5; y < height-5; y++)
+        for (uint16_t y = 0; y < height; y++)
         {
             float distance = depth.get_distance(x,y);
             if (abs(distance - objectDistance) <= vicinityDistance)
