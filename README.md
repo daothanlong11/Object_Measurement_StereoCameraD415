@@ -13,5 +13,6 @@ Bài hướng dẫn bao gồm 3 phần:
 
 Ở phần này, chúng ta sẽ tìm hiểu xem stereo camera là gì và cách để nó có thể tính độ sâu
 * Stereo camera là một hệ thống gồm 2 hoặc nhiều hơn camera kết hợp với nhau, với mục tiêu mô phỏng mắt người để có thể tính độ sâu
-![Image of stereo camera]()
+
+![Image of stereo camera](image/new_stereo_camera.jpg)
 
