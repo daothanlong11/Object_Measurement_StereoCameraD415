@@ -107,14 +107,17 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     uint numberNext;
     uint8_t numberloop = 0;
 
-    bool noObject = true;
+    bool noObject = true; //cờ báo chưa tìm thấy vật
+    //Quét theo đường ngang giữa ảnh, phát hiện vật có trên đường
     for (uint16_t i = 5; i < pointCentral.x-5; i+=5)
     {
         float distance1 = depth.get_distance(pointCentral.x+i, pointCentral.y);
         float distance2 = depth.get_distance(pointCentral.x-i, pointCentral.y);
+        //điều kiện để loại bỏ những điểm khoảng cách đo sai và điều kiện để phát hiện vật là có sự thay đổi lớn về giá trị khoảng cách, mức ngưỡng là giá trị của biến vicinityDistance 
         if ((distance1 > 0.005f) && (distance1 < 1.5f) && (abs(distance1 - distanceCenter) > vicinityDistance))
         {
             noObject = false;
+            //đã xác định đc có vật, kiểm tra và xác định khoảng cách vật và sàn
             if (distance1 > distanceCenter)
             {
                 objectDistance = distanceCenter;
@@ -127,6 +130,7 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
             }
             break;
         }
+        //làm tương tự như biến distance1
         if ((distance2 > 0.01f) && (distance2 < 1.5f) && (abs(distance2 - distanceCenter) > vicinityDistance))
         {
             noObject = false;
@@ -143,8 +147,10 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
             break;
         }
     }
+    //nếu cờ noObject vẫn true thì thực hiện quét theo đường dọc giữa ảnh, phát hiện vật
     if (noObject)
     {
+        //bước này tương tự như ở trên, nhưng thay vào đó là cố định trục x
         for (uint16_t i = 5; i < pointCentral.y-5; i+=5)
         {
             float distance1 = depth.get_distance(pointCentral.x, pointCentral.y+i);
@@ -181,7 +187,7 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
             }
         }
     }
-
+    //nếu cờ noObject vẫn true thì thực hiện quét theo vòng tròn từ tâm ra, phát hiện vật
     if (noObject)
     {
         maxDistance = distanceCenter;
@@ -194,6 +200,7 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
             }
             numberNext = 0;
             vicinityDistance = setVicinityDistance[numberloop];
+            //vòng lặp quét theo đường tròn từ tâm
             for (uint r=1; r < radius; r++)
             {
                 int16_t x = pointCentral.x - (r+1)*lengthWidth;
@@ -241,16 +248,13 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
             }
             numberloop++;
             //cout<<"so luong: "<<numberNext<<endl;
-            
         } while (numberNext > 2);
         //imshow("frametemp", frametemp);
-
         if (numberNext == 0)
         {
             fourCorner.push_back(Point2f(0.0f,0.0f));
             return fourCorner;
         }
-
         for (uint16_t i = 0; i < numberNext; i++)
         {
             if ((setDistance[i][1] > frequencyDistancePoint))
@@ -259,16 +263,16 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
                 objectDistance = setDistance[i][0];
             }
         }
-        
     }
 
     //cout<<"khoang cach tam camera: "<<distanceCenter<<endl;
     //cout<<"khoang cach den vat: "<<objectDistance<<endl;
     //cout<<"khoang cach den san: "<<maxDistance<<endl;
-    
+    //điều chỉnh giá trị so sánh vicinityDistance tương ứng với từng khoảng giá trị chiều cao vật thể
     vicinityDistance = 0.02f;
     if ((maxDistance - objectDistance) > 0.13f) vicinityDistance = 0.025f;
     else if ((maxDistance - objectDistance) < 0.7f) vicinityDistance = 0.012f;
+    //vẽ ảnh nhị phân mặt trên vật thể và tính lại giá trị khoảng cách đến sàn và vật
     for (uint16_t x = 0; x < width; x++)
     {
         for (uint16_t y = 0; y < height; y++)
@@ -299,7 +303,7 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     Mat imageContours = frameDepth.clone();
     /// Find contours
     findContours( imageContours, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0) );
-    
+    //tìm contours có size lớn nhất, đó là đường bao vật thể
     int indexmaxContours[2] = {0, 0};
     for (uint8_t i=0; i<contours.size(); i++)
     {
@@ -309,7 +313,7 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
             indexmaxContours[1] = contours[i].size();
         }
     }
-
+    //tìm góc vật thể dựa vào hàm minAreaRect
     Point2f fourPoint[4];
     RotatedRect box = minAreaRect(contours[indexmaxContours[0]]);
     box.points(fourPoint);
@@ -324,5 +328,6 @@ vector<Point2f> getCorner(rs2::depth_frame depth, int width, int height)
     //int64 t1 = cv::getTickCount();
     //double secs = (t1-t0)/cv::getTickFrequency();
     //cout<<"thoi gian: "<<secs<<endl;
+    //trả về toạ độ 4 góc, đọ cao vật thể và khoảng cách tới vật để xử lý trong hàm main
     return fourCorner;
 }
