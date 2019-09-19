@@ -6,8 +6,10 @@
 cụ thể là đo kích thước hình hộp
 Bài hướng dẫn bao gồm 3 phần:
 1/ Cách stereo camera tính độ sâu
+
 2/ Cách cài đặt và sử dụng thư viện librealsene2 trên Window và Linux
-3/ Giải thuật thực hiện trong ứng dụng đo kích thước hình hộp
+
+3/ Hướng thực hiện trong ứng dụng đo kích thước hình hộp
 
 ## 1/ Cách stereo camera tính độ sâu
 
@@ -122,7 +124,7 @@ Còn nếu muốn build code bằng thư viện Opencv thì ta làm như sau:
 
 Tất nhiên muốn sử dụng thư viện Opencv thì ta phải cài vào máy rồi nhé, cách cài thì có thể làm theo bài hướng dẫn sau: [Opencv Installation](https://www.pyimagesearch.com/2016/10/24/ubuntu-16-04-how-to-install-opencv/)
 
-## 3/ Giải thuật thực hiện trong ứng dụng đo kích thước hình hộp
+## 3/ Hướng thực hiện trong ứng dụng đo kích thước hình hộp
 
 * Tổng quan về ứng dụng:
 
