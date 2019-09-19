@@ -1,8 +1,0 @@
-﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(377,5): warning MSB8004: Output Directory does not end with a trailing slash.  This build instance will add the slash as it is required to allow proper evaluation of the Output Directory.
-  Generating code
-  All 1666 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
-  Finished generating code
-  Code.vcxproj -> C:\Users\daoth\source\repos\Project5\Code\..\Final_Release\Code.exe
-  Copy Intel RealSense SDK 2.0 shared module next to the application
-  C:\Program Files (x86)\Intel RealSense SDK 2.0\bin\x64\realsense2.dll
-  1 File(s) copied
