@@ -194,8 +194,20 @@ Trước khi chúng ta sử dụng depth map thì chúng ta cần xử lí đầ
 
 Bên trên mình đã giới thiệu một số hàm quan trọng trong source code này, đó là đổi từ điểm pixel ảnh sáng điểm 3D để tính khoảng cách trong tọa độ thực và cách để cho phần xử lí đầu vào chạy nền
 
-Mình khuyến khích các bạn đọc kĩ ví dụ mẫu measure của thư viện, vì source code này mình dựa vào nó
+Mình khuyến khích các bạn đọc kĩ ví dụ mẫu measure của thư viện librealsense2, vì source code này mình dựa vào nó
 
-Mình sẽ up hết project mình làm lên Github này, nếu có vấn đề gì thì bạn hãy tạo câu hỏi trong phần Issues mình sẽ cố gắng trả lời các bạn!!!
+Giao diện điều khiển mình viết bằng C#, việc giao tiếp giữa 2 ngôn ngữ C# và C++ ở đây mình chọn phương pháp đơn giản là giao tiếp bằng file, nghĩa là khi bên này tạo một file mới, bên kia sẽ kiểm tra xem file đã được tạo chưa và tiến hành thực thi
+
+Thư mục chứa file giao tiếp tên là control, được chia như sau:
+    - auto: chứa file khi nhấn mode auto
+    - manual: chứa file khi nhấn mode manual
+    - close: chứa file khi nhấn reset
+    - start: chứa file khi nhấn start
+    - state: chứa file khi nhấn distance (xuất kết quả)
+    - image: chứa ảnh chụp vật thể được đo
+
+Các file text dùng để chứa kết quả cho source code và giao diện truy xuất, file text number để số file đã tạo ra để dùng mỗi lần mở giao diện lên, chương trình sẽ xóa hết các file cũ đã tạo
+
+Mình sẽ up hết project mình làm lên Github này, nếu có vấn đề gì thì bạn hãy tạo câu hỏi trong phần Issues, mình sẽ cố gắng trả lời các bạn!!!
 
 Chúc các bạn thành công trong việc build cho mình một ứng dụng sử dụng Stereo Depth Camera D415 :))
