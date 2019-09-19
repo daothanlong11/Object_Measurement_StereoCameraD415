@@ -94,6 +94,7 @@ Sau khi chương trình khởi động sau, có thể chương trình sẽ báo 
 ![Image of error](image/error.png)
 
 Đây là lỗi khi chương trình của bạn có 2 file realsense-udev, vì thể chúng ta cần xóa đi một cái, ở đây chúng ta sẽ xóa file: 99-realsense-libusb.rules
+
 Mở Command Line mới và đi vào đường dẫn như trong thông báo lỗi của chương trình:
 
     cd /etc/udev/rules.d      //đi đến đường dẫn chứa file cần xóa
@@ -194,5 +195,7 @@ Trước khi chúng ta sử dụng depth map thì chúng ta cần xử lí đầ
 Bên trên mình đã giới thiệu một số hàm quan trọng trong source code này, đó là đổi từ điểm pixel ảnh sáng điểm 3D để tính khoảng cách trong tọa độ thực và cách để cho phần xử lí đầu vào chạy nền
 
 Mình khuyến khích các bạn đọc kĩ ví dụ mẫu measure của thư viện, vì source code này mình dựa vào nó
+
+Mình sẽ up hết project mình làm lên Github này, nếu có vấn đề gì thì bạn hãy tạo câu hỏi trong phần Issues mình sẽ cố gắng trả lời các bạn!!!
 
 Chúc các bạn thành công trong việc build cho mình một ứng dụng sử dụng Stereo Depth Camera D415 :))
